@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake World-Smooth&Fast</title>
+    <link href="https://fonts.googleapis.com/css?family=Sofia" rel="stylesheet">
+    <!-- Add Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .body {
+            background: url("8552481.webp");
+            min-height: 100vh;
+            background-size: 110vw 110vh;
+            background-repeat: no-repeat;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #board {
+            background: linear-gradient(rgb(236, 10, 10), rgb(186, 213, 7));
+            width: 110vmin;
+            height: 90vmin;
+            border: 2px solid black;
+            display: grid;
+            grid-template-rows: repeat(18, 1fr);
+            grid-template-columns: repeat(18, 1fr);
+        }
+
+        .head {
+            background: linear-gradient(rgb(0, 255, 132), rgb(128, 0, 105));
+            border: 2px solid rgb(11, 239, 83);
+            border-radius: 8px;
+        }
+
+        .snake {
+            background: linear-gradient(purple, black);
+            border: 0.25vmin solid white;
+            border-radius: 90px;
+        }
+
+        .food {
+            background: linear-gradient(yellow, green);
+            border: 0.25vmin solid rgba(13, 46, 206, 0.888);
+            border-radius: 15px;
+        }
+
+        /* Additional Styles for Responsiveness */
+        #scoreBox {
+            font-size: 39px;
+            font-weight: bold;
+            font-family: 'Sofia';
+            font-size: 22px;
+        }
+
+        #highscorebox {
+            font-size: 39px;
+            font-weight: bold;
+            font-family: 'Sofia';
+            font-size: 22px;
+        }
+
+        /* Common styles for smartphones and small tablets */
+        @media (max-width: 768px) {
+            #board {
+                width: 80vmin;
+                height: 80vmin;
+            }
+
+            #scoreBox,
+            #highscorebox {
+                font-size: 24px;
+            }
+        }
+
+        /* Styles for larger tablets */
+        @media (min-width: 768px) and (max-width: 1024px) {
+            #board {
+                width: 60vmin;
+                height: 60vmin;
+            }
+
+            #scoreBox,
+            #highscorebox {
+                font-size: 28px;
+            }
+        }
+
+        /* Styles for laptops and desktops */
+        @media (min-width: 1024px) {
+            #board {
+                width: 50vmin;
+                height: 50vmin;
+            }
+
+            #scoreBox,
+            #highscorebox {
+                font-size: 32px;
+            }
+        }
+
+        /* Add other media queries as needed for different breakpoints */
+    </style>
+</head>
+<body>
+    <div class="body">
+        <div class="container">
+            <div class="row justify-content-end">
+                <div class="col-6 col-md-4">
+                    <div id="scoreBox">Score: 0</div>
+                    <div id="highscorebox">Highest Score:</div>
+                </div>
+            </div>
+            <div id="board"></div>
+        </div>
+    </div>
+
+    
+</body>
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Your game logic scripts go here -->
+<script>
+    /* Your game logic scripts go here */
+    let inputDir={x:0,y:0}
+    let foodSound=new Audio('food.mp3');
+    let gameOverSound=new Audio('gameover.mp3');
+    let moveSound=new Audio('move.mp3');
+    let musicSound=new Audio('music.mp3');
+    let score=0;
+    let speed=8;
+    let lastPaintTime=0;
+    let snakeArr=[
+        {x:13,y:15}
+
+    ] 
+
+    food={ x: 6 , y:7};
+    //Function
+    function main(ctime){
+        window.requestAnimationFrame(main);
+        //console.log(ctime);
+        if((ctime-lastPaintTime)/1000<1/speed){
+            return;
+        }
+        lastPaintTime=ctime;
+        gameEngine(); 
+        
+
+    }
+    function gameEngine(){
+        //updating Snake Array
+        if(isCollapse(snakeArr)){
+            gameOverSound.play();
+            musicSound.pause();
+            inputDir={x: 0,y: 0};
+            alert("Game Over.press any key to play Again");
+            snakeArr=[ {x:13,y:15} ] ;
+            musicSound.play();
+            score=0;
+
+
+        }
+        function isCollapse(snake){
+        ///if you bump into yourself
+        for(let i=1;i<snakeArr.length;i++){
+            if(snake[i].x===snake[0].x && snake[i].y===snake[0].y){
+                return true;
+            }
+        }
+        //if you bump into wall
+        if(snake[0].x >=18 ||snake[0].x<=0 || snake[0].y>=18 || snake[0].y<=0){
+            return true;
+        }
+
+
+
+        }
+    //after eating food increment score  regenrate food
+    if((snakeArr[0]).y===food.y && (snakeArr[0]).x===food.x){
+        foodSound.play();
+        score+=1;
+        if(score>Highscoreval){
+            Highscoreval=score;
+            localStorage.setItem('highscorebox',JSON.stringify(Highscoreval));
+            highscorebox.innerHTML='Highest Score :'+ Highscoreval;
+
+        }
+        scoreBox.innerHTML="Score:"+score;
+        snakeArr.unshift({x:snakeArr[0].x+inputDir.x,y:snakeArr[0].y+inputDir.y});
+        let a=2;
+        let b=16;
+        food={x:Math.round(a+(b-a)*Math.random()),y:Math.round(a+(b-a)*Math.random())};
+    }
+    //moving the snake
+    for(let i=snakeArr.length-2;i>=0;i--){
+    
+        snakeArr[i+1]={...snakeArr[i]};
+
+    }
+    snakeArr[0].x +=inputDir.x;
+    snakeArr[0].y +=inputDir.y;
+
+        
+
+        //display the snake
+        board.innerHTML="";
+        snakeArr.forEach((e,index)=>{
+            snakeElement=document.createElement('div');
+            snakeElement.style.gridRowStart=e.y;
+            snakeElement.style.gridColumnStart=e.x;
+           
+            
+            if(index ===0 ){
+                snakeElement.classList.add('head');
+            }else{
+                snakeElement.classList.add('snake');
+            }
+            
+            board.appendChild(snakeElement);
+        });
+        //Displaying Food
+            foodElement=document.createElement('div');
+            foodElement.style.gridRowStart=food.y;
+            foodElement.style.gridColumnStart=food.x;
+            foodElement.classList.add('food');
+            board.appendChild(foodElement);
+    }
+    //Logic
+    let Highscore=localStorage.getItem('highscorebox');
+    if(Highscore===null){
+        Highscoreval=0;
+        localStorage.setItem('highscorebox',JSON.stringify(Highscoreval));
+
+    }
+    else{
+        Highscoreval=JSON.parse(Highscore);        
+        highscorebox.innerHTML='Highest Score :'+ Highscore;
+
+    }
+    window.requestAnimationFrame(main);
+    window.addEventListener('keydown',e=>{
+    inputDir={x:0,y:1};//starting game
+    //moveSound.play();
+    switch(e.key){
+        case "ArrowUp":
+            console.log( "ArrowUp");
+            inputDir.x=0 ;
+            inputDir.y=-1;
+            break;
+
+        case "ArrowDown":
+            console.log("ArrowDown");
+            inputDir.x= 0;
+            inputDir.y=1 ;
+            break;
+            
+        case "ArrowRight":
+            console.log("ArrowRight");
+            inputDir.x= 1;
+            inputDir.y=0 ;
+            break;
+
+        case "ArrowLeft":
+            console.log("ArrowLeft");
+            inputDir.x= -1;
+            inputDir.y=0 ;
+            break;
+
+        default:
+            break;    
+    }
+    });
+</script>
+</html>
